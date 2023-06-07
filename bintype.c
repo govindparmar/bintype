@@ -56,7 +56,9 @@ int __cdecl main(int argc, char *argv[])
 				putchar(' ');
 				for(k = 0; k < 16; k++)
 				{
-					putchar(PRINTABLEBYTE(print[k]));
+					if((i + k - 16) >= filesize) putchar(' ');
+					else putchar(PRINTABLEBYTE(print[k]));
+					
 				}
 				if(i==paddedsize-1) break;
 				memset(print, 0, 16);
@@ -71,7 +73,8 @@ int __cdecl main(int argc, char *argv[])
 		{
 			putchar(' ');
 		}
-		printf("%.2X ", buffer[i]);
+		if(i >= filesize) printf("   ");
+		else printf("%.2X ", buffer[i]);
 		print[j++] = buffer[i];
 	}
 	
