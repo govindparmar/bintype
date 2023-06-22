@@ -10,7 +10,7 @@ int __cdecl main(int argc, char *argv[])
 {
 	FILE *fp;
 	errno_t err;
-	size_t filesize, i, j, paddedsize;
+	size_t filesize, i, i2, i3, paddedsize;
 	byte *buffer = NULL, print[16];
 	
 	if(argc<2)
@@ -33,7 +33,7 @@ int __cdecl main(int argc, char *argv[])
 	
 	paddedsize = filesize;
 
-	while((paddedsize++)%16 != 0) ;
+	while((paddedsize++)%16 != 0);
 	
 
 	buffer = malloc(paddedsize + 1);
@@ -52,19 +52,27 @@ int __cdecl main(int argc, char *argv[])
 		{
 			if(i > 0)
 			{
-				size_t k;
 				putchar(' ');
-				for(k = 0; k < 16; k++)
+				for(i3 = 0; i3 < 16; i3++)
 				{
-					if((i + k - 16) >= filesize) putchar(' ');
-					else putchar(PRINTABLEBYTE(print[k]));
+					if ((i + i3 - 16) >= filesize)
+					{
+						putchar(' ');
+					}
+					else
+					{
+						putchar(PRINTABLEBYTE(print[i3]));
+					}
 					
 				}
-				if(i==paddedsize-1) break;
+				if (i == paddedsize - 1)
+				{
+					break;
+				}
 				memset(print, 0, 16);
 				putchar('\n');
 			}
-			j = 0;
+			i2 = 0;
 			
 			printf("%.8X: ", i);
 
@@ -73,9 +81,15 @@ int __cdecl main(int argc, char *argv[])
 		{
 			putchar(' ');
 		}
-		if(i >= filesize) printf("   ");
-		else printf("%.2X ", buffer[i]);
-		print[j++] = buffer[i];
+		if (i >= filesize)
+		{
+			printf("   ");
+		}
+		else
+		{
+			printf("%.2X ", buffer[i]);
+		}
+		print[i2++] = buffer[i];
 	}
 	
 	free(buffer);
