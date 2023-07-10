@@ -1,17 +1,23 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 typedef unsigned char byte;
+#define BYTES_PER_ROW 16
+C_ASSERT(!(BYTES_PER_ROW & 1));
 
-#define PRINTABLEBYTE(b) (((b) >= (0x20)) && ((b) <= (0x7E))) ? ((char)(b)) : ('.')
+#define REPRESENT_BYTE(b) (((b) >= (0x20)) && ((b) <= (0x7E))) ? ((char)(b)) : ('.')
 
 int __cdecl main(int argc, char *argv[])
 {
 	FILE *fp;
 	errno_t err;
 	size_t filesize, i, i2, i3, paddedsize;
-	byte *buffer = NULL, print[16];
+	byte *buffer = NULL, print[BYTES_PER_ROW];
+	
 	
 	if(argc<2)
 	{
@@ -20,11 +26,10 @@ int __cdecl main(int argc, char *argv[])
 	}
 	
 	fp = fopen(argv[1], "rb");	
-	
 	if(!fp)
 	{
 		printf("Could not open %s\n", argv[1]);
-		exit(EXIT_FAILURE);
+		return ENOENT;
 	}
 	
 	fseek(fp, 0, SEEK_END);
@@ -32,36 +37,35 @@ int __cdecl main(int argc, char *argv[])
 	rewind(fp);
 	
 	paddedsize = filesize;
-
-	while((paddedsize++)%16 != 0);
-	
+	while((paddedsize++) % BYTES_PER_ROW != 0);
 
 	buffer = malloc(paddedsize + 1);
-	if(buffer == NULL)
+	if(NULL == buffer)
 	{
 		perror("malloc");
-		exit(EXIT_FAILURE);
+		return ENOMEM;
 	}
+	
 	memset(buffer, 0, paddedsize);
 	fread(buffer, 1, filesize, fp);
 	fclose(fp);
 	
 	for(i = 0; i <= paddedsize; i++)
 	{
-		if((i%16) == 0)
+		if((i % BYTES_PER_ROW) == 0)
 		{
 			if(i > 0)
 			{
 				putchar(' ');
-				for(i3 = 0; i3 < 16; i3++)
+				for(i3 = 0; i3 < BYTES_PER_ROW; i3++)
 				{
-					if ((i + i3 - 16) >= filesize)
+					if ((i + i3 - BYTES_PER_ROW) >= filesize)
 					{
 						putchar(' ');
 					}
 					else
 					{
-						putchar(PRINTABLEBYTE(print[i3]));
+						putchar(REPRESENT_BYTE(print[i3]));
 					}
 					
 				}
@@ -69,7 +73,7 @@ int __cdecl main(int argc, char *argv[])
 				{
 					break;
 				}
-				memset(print, 0, 16);
+				memset(print, 0, BYTES_PER_ROW);
 				putchar('\n');
 			}
 			i2 = 0;
@@ -77,7 +81,7 @@ int __cdecl main(int argc, char *argv[])
 			printf("%.8X: ", i);
 
 		}
-		if((i%8) == 0 && i > 0 && (i%16)!=0)
+		if(i > 0 && (i % (BYTES_PER_ROW / 2)) == 0 && (i % BYTES_PER_ROW) != 0)
 		{
 			putchar(' ');
 		}
@@ -87,13 +91,15 @@ int __cdecl main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("%.2X ", buffer[i]);
+			printf("%.2hhX ", buffer[i]);
 		}
 		print[i2++] = buffer[i];
 	}
 	
 	free(buffer);
 	buffer = NULL;
+
 	putchar('\n');
+	
 	return 0;
 }
