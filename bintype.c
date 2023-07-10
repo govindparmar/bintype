@@ -1,17 +1,20 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
+#ifndef C_ASSERT
+// Straight copy from Win32 headers, but not including Windows.h makes this portable
+#define C_ASSERT(e) typedef char __C_ASSERT__[(e) ? 1 : -1]
+#endif
+
 typedef unsigned char byte;
 #define BYTES_PER_ROW 16
 C_ASSERT(!(BYTES_PER_ROW & 1));
-
 #define REPRESENT_BYTE(b) (((b) >= (0x20)) && ((b) <= (0x7E))) ? ((char)(b)) : ('.')
 
-int __cdecl main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	FILE *fp;
 	errno_t err;
@@ -19,7 +22,7 @@ int __cdecl main(int argc, char *argv[])
 	byte *buffer = NULL, print[BYTES_PER_ROW];
 	
 	
-	if(argc<2)
+	if(argc < 2)
 	{
 		puts("Usage: bintype filename");
 		return 0;
@@ -37,7 +40,7 @@ int __cdecl main(int argc, char *argv[])
 	rewind(fp);
 	
 	paddedsize = filesize;
-	while((paddedsize++) % BYTES_PER_ROW != 0);
+	while((paddedsize++) % BYTES_PER_ROW);
 
 	buffer = malloc(paddedsize + 1);
 	if(NULL == buffer)
