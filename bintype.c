@@ -38,6 +38,11 @@ int main(int argc, char *argv[])
 	fseek(fp, 0, SEEK_END);
 	filesize = ftell(fp);
 	rewind(fp);
+	if(0 == filesize)
+	{
+		puts("File is empty");
+		return 0;
+	}
 	
 	paddedsize = filesize;
 	while((paddedsize++) % BYTES_PER_ROW);
